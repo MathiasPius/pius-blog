@@ -1,0 +1,16 @@
+{% extends "root.tera" %}
+
+{% block breadcrumb %}
+<a href="/">Home</a>&nbsp;&nbsp;&mdash;&nbsp;&nbsp;<a href="/{{ article.slug }}">{{ article.title }}</a>
+{% endblock breadcrumb %}
+
+{% block content %}
+<article>
+	{{ blog::title(article=article) }}
+	{{ blog::subtext(article=article) }}
+	<br />
+	<section>
+		{{ article.body }}
+	</section>	
+</article>
+{% endblock content %}

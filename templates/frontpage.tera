@@ -1,0 +1,14 @@
+{% extends "root.tera" %}
+{% block title %}Blog Index{% endblock title %}
+
+{% block content %}
+{% for article in articles %}
+	<article class="listed">
+		{{ blog::title(article=article) }}
+		{{ blog::subtext(article=article) }}
+		<br />
+		{{ article.body | striptags | truncate(length=400) }}
+		<br />
+	</article>
+{% endfor %}
+{% endblock content %}

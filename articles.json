@@ -1,0 +1,20 @@
+[
+	{
+		"title": "Hello World!",
+		"author": {
+			"name": "Mathias Pius",
+			"email": "contact@pius.io"
+		},
+		"published": 1562016203,
+		"template": "first-article.tera"
+	},
+	{
+		"title": "Second Edition!",
+		"author": {
+			"name": "Mathias Pius"
+		},
+		"published": 1562016203,
+		"template": "first-article.tera",
+		"slug": "this-is-a-custom-slug"
+	}
+]

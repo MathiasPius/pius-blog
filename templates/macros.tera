@@ -1,0 +1,17 @@
+{% macro subtext(article) %}
+	<small>
+	{% if article.author.email %}
+		<a href="mailto:{{ article.author.email }}">{{ article.author.name }}</a>
+	{% else %}
+		{{ article.author.name }}
+	{% endif %}
+	&#8226;
+	<time datetime="{{ article.published | date }}">
+		{{ article.published | date(format="%c") }}
+	</time>
+	</small>
+{% endmacro subtext %}
+
+{% macro title(article) %}
+	<a href="/{{ article.slug }}"><h1 class="lead">{{ article.title }}</h1></a>
+{% endmacro title %}
