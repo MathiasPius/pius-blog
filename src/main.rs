@@ -39,9 +39,12 @@ fn main() -> std::io::Result<()> {
     env_logger::init();
 
     HttpServer::new(move || {
-        let mut tera = Tera::new("templates/**/*.tera").expect("failed to initialize tera templates");
+        let mut tera = Tera::parse("templates/**/*.tera")
+            .expect("failed to initialize tera templates");
         tera.register_filter("highlight", highlighter::highlight);
         tera.register_filter("codeblock", highlighter::codeblock);
+        tera.build_inheritance_chains()
+            .expect("failed to initialize tera templates");
 
         let world = World::new(&tera, include_str!("../articles.json"));
 
