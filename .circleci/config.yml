@@ -14,9 +14,9 @@ jobs:
       - checkout
       - restore_cache:
           key: project-cache
-      - run:
-          name: Check formatting
-          command: cargo fmt -- --write-mode=diff
+      #- run:
+      #    name: Check formatting
+      #    command: cargo fmt -- --write-mode=diff
       #      rustfmt --version
       #- run:
       #    name: Nightly Build
