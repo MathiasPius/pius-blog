@@ -46,9 +46,11 @@ jobs:
           cp -R ./templates ./artifacts/
       - restore_cache:
           key: debug-cache
-      - run: cp -R ./target/debug/blog ./artifacts/
+      - run: |
+          cp -R ./target/debug/blog ./artifacts/
+          tar c -zf debug.zip ./artifacts/*
       - store_artifacts:
-          path: ./artifacts/
+          path: ./debug.zip
           destination: debug-artifact
 
 workflows:
