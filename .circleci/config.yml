@@ -48,10 +48,28 @@ jobs:
           key: debug-cache
       - run: |
           cp -R ./target/debug/blog ./artifacts/
-          tar c -zf debug.zip ./artifacts/*
+          tar c -zf debug.tar.gz ./artifacts/*
       - store_artifacts:
-          path: ./debug.zip
-          destination: debug-artifact
+          path: ./debug.tar.gz
+          destination: debug-artifact.tar.gz
+
+  "store release artifacts":
+    docker:
+      - image: frolvlad/alpine-rust:latest
+
+    steps:
+      - checkout
+      - run: |
+          mkdir artifacts/
+          cp -R ./templates ./artifacts/
+      - restore_cache:
+          key: release-cache
+      - run: |
+          cp -R ./target/release/blog ./artifacts/
+          tar c -zf release.tar.gz ./artifacts/*
+      - store_artifacts:
+          path: ./release.tar.gz
+          destination: release-artifact.tar.gz
 
 workflows:
   version: 2
@@ -62,4 +80,8 @@ workflows:
       - store debug artifacts:
           requires:
             - build debug
+
+      - store release artifacts:
+          requires:
+            - build release
         
