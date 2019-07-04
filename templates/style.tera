@@ -61,9 +61,9 @@ article small {
 	color: rgba(0,0,0,0.5)
 }
 
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 1000px) {
 	.boxed {
-		width: 800px;
+		width: 1000px;
 	}
 }
 </style>

@@ -10,7 +10,7 @@
 	{{ blog::subtext(article=article) }}
 	<br />
 	<section>
-		{{ article.body }}
+		{{ article.body | safe }}
 	</section>	
 </article>
 {% endblock content %}

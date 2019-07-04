@@ -9,6 +9,7 @@ use actix_web::{App, HttpServer, HttpResponse, web};
 
 mod model;
 mod error;
+mod highlighter;
 
 use model::{World};
 use error::BlogError;
@@ -16,6 +17,7 @@ use error::BlogError;
 fn index(tera: web::Data<Tera>, articles: web::Data<World>) -> Result<HttpResponse, BlogError> {
     let mut ctx = Context::new();
     ctx.insert("articles", &articles.articles);
+
     let body = tera.render("frontpage.tera", &ctx)?;
 
     Ok(HttpResponse::Ok().body(body))
@@ -26,6 +28,7 @@ fn single_article(tera: web::Data<Tera>, world: web::Data<World>, name: web::Pat
 
     let mut ctx = Context::new();
     ctx.insert("article", &article);
+
     let body = tera.render("single-article.tera", &ctx)?;
     
     Ok(HttpResponse::Ok().body(body))
@@ -36,7 +39,10 @@ fn main() -> std::io::Result<()> {
     env_logger::init();
 
     HttpServer::new(move || {
-        let tera = Tera::new("templates/**/*.tera").expect("failed to initialize tera templates");
+        let mut tera = Tera::new("templates/**/*.tera").expect("failed to initialize tera templates");
+        tera.register_filter("highlight", highlighter::highlight);
+        tera.register_filter("codeblock", highlighter::codeblock);
+
         let world = World::new(&tera, include_str!("../articles.json"));
 
         App::new()

@@ -3,10 +3,28 @@ This is the body of the article!
 <h2>Lorem Ipsum?</h2>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec sem nec tellus facilisis porta. Fusce a nunc pharetra, mollis sem quis, elementum ligula. Nam at elementum enim. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras quis facilisis nisi. Aenean maximus nisi et velit maximus, eu sodales ex molestie. Donec aliquet, dolor quis viverra interdum, risus leo suscipit nulla, sit amet blandit massa augue ut tortor.</p>
 
+<p>
+{{ `
+fn number<'a, I>() -> impl Parser<Input = I, Output = Token>
+    where I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>
+{
+	recognize((digit(), skip_many(choice((digit(), char('.')))), optional(char('f'))))
+		.map(|v| Token { ttype: Type::Number, value: v})
+}
+
+
+fn whitespace<'a, I>() -> impl Parser<Input = I, Output = Token>
+    where I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>
+{
+	one_of("\t\r\n ".chars()).map(|v: char| Token { ttype: Type::Whitespace, value: v.to_string()})
+}
+` | highlight | codeblock }}
+</p>
+
 <p>Cras non neque egestas, lacinia urna eget, aliquam ante. Suspendisse nulla est, aliquet et nulla in, blandit vehicula eros. Quisque iaculis rhoncus purus, at pulvinar sem elementum efficitur. Aliquam luctus, turpis id consequat vestibulum, lorem metus viverra arcu, sed convallis orci mauris consequat magna. Donec quis convallis urna, nec efficitur tortor. Cras tristique sapien at dolor facilisis, sit amet luctus felis euismod. Pellentesque vehicula ut ex ut elementum. Suspendisse tristique tincidunt ante id pellentesque. Quisque et mi eleifend, pulvinar velit vitae, egestas turpis. Integer arcu dolor, sagittis sit amet lacus ac, porta pulvinar nibh. Morbi posuere mi a purus ultricies, sed egestas eros laoreet. Vivamus mattis cursus urna. Mauris sollicitudin sodales purus, ac iaculis quam. Sed gravida risus quis tellus volutpat lobortis. Sed sit amet ex ac purus porttitor dapibus.</p>
 
 <p>Pellentesque odio sapien, egestas ut orci eget, ornare tempus ante. Integer rutrum ullamcorper tortor vitae rutrum. Mauris eu arcu lorem. Morbi ornare, neque vitae volutpat ornare, elit dolor maximus nulla, sit amet mollis ante nisi hendrerit sapien. Sed in nulla mauris. Aliquam quis laoreet elit. Vivamus ornare leo lorem, viverra volutpat tortor ornare quis. Donec nibh ante, blandit eu nulla nec, pharetra placerat lacus. Aliquam et nulla sit amet erat feugiat ultricies ac eu turpis. Maecenas posuere pulvinar tellus. Ut sit amet nibh pellentesque, rhoncus ipsum et, blandit diam. Aenean lectus turpis, blandit et lectus quis, venenatis consequat turpis. Integer posuere sem risus, at scelerisque sem vehicula sit amet. Vestibulum consectetur tortor vel erat consectetur volutpat. Curabitur libero nunc, fringilla in viverra eget, condimentum commodo urna.</p>
 
 <p>Interdum et malesuada fames ac ante ipsum primis in faucibus. Proin diam enim, vehicula non augue ac, imperdiet rutrum est. Mauris facilisis arcu pulvinar felis sagittis, at feugiat arcu elementum. Ut blandit eget urna sed gravida. Aliquam quam neque, dignissim quis pulvinar sit amet, rhoncus sit amet enim. Vivamus dictum imperdiet mi, eu gravida quam feugiat et. Aliquam auctor magna mauris, quis ultricies est mattis sit amet. Proin a augue vel massa molestie pharetra. Duis malesuada erat aliquam lacinia mollis.</p>
-
-<p>Sed sed dolor a purus ornare efficitur id in leo. Phasellus imperdiet nisl et eros volutpat, ut commodo dolor hendrerit. Mauris pulvinar nunc mauris, mollis pharetra ligula facilisis at. Morbi sit amet nunc ex. Proin tristique porta nisl sed posuere. Suspendisse elementum posuere justo, et aliquam sem gravida ac. Sed congue tristique erat, ac eleifend urna scelerisque eget. Nulla condimentum eget libero eu gravida. </p>
