@@ -16,9 +16,8 @@ jobs:
           key: project-cache
       - run:
           name: Check formatting
-          command: |
-            rustfmt --version
-            cargo fmt -- --write-mode=diff
+          command: cargo fmt -- --write-mode=diff
+      #      rustfmt --version
       #- run:
       #    name: Nightly Build
       #    command: |
