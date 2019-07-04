@@ -1,46 +1,53 @@
 version: 2
 
 jobs:
-  build:
+  "build debug":
     docker:
       - image: frolvlad/alpine-rust:latest
-
-    environment:
-      # Set your codecov token if your repository is private.
-      #CODECOV_TOKEN: <your-token>
-      TZ: "/usr/share/zoneinfo/Europe/Copenhagen"
 
     steps:
       - checkout
       - restore_cache:
-          key: project-cache
-      #- run:
-      #    name: Check formatting
-      #    command: cargo fmt -- --write-mode=diff
-      #      rustfmt --version
-      #- run:
-      #    name: Nightly Build
-      #    command: |
-      #      rustup run nightly rustc --version --verbose
-      #      rustup run nightly cargo --version --verbose
-      #      rustup run nightly cargo build
-      #- run:
-      #    name: Stable Build
-      #    command: |
-      #      rustup run stable rustc --version --verbose
-      #      rustup run stable cargo --version --verbose
-      #      rustup run stable cargo build
-      #- run:
-      #    name: Test
-      #    command: rustup run stable cargo test
-      #- run:
-      #    name: Upload Coverage
-      #    command: ./scripts/codecov.sh
+          key: debug-cache
+      - run:
+            name: Build
+            command: cargo build
+      - save_cache:
+          key: debug-cache
+          paths:
+            - "~/.cargo"
+            - "./target"
+
+  "build release":
+    docker:
+      - image: frolvlad/alpine-rust:latest
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: release-cache
       - run:
             name: Build
             command: cargo build --release
       - save_cache:
-          key: project-cache
+          key: release-cache
           paths:
             - "~/.cargo"
             - "./target"
+
+  "store debug artefacts":
+    docker:
+      - image: frolvlad/alpine-rust:latest
+
+    steps:
+      - checkout
+      - run: |
+          mkdir artefacts/
+          cp -R ./templates ./artefacts/
+      - restore_cache:
+          key: debug-cache
+      - run: cp -R ./target/debug/blog ./artefacts/
+      - store_artefacts:
+          path: ./artefacts/
+          destination: debug-artefact
+
