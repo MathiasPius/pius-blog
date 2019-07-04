@@ -35,21 +35,21 @@ jobs:
             - "~/.cargo"
             - "./target"
 
-  "store debug artefacts":
+  "store debug artifacts":
     docker:
       - image: frolvlad/alpine-rust:latest
 
     steps:
       - checkout
       - run: |
-          mkdir artefacts/
-          cp -R ./templates ./artefacts/
+          mkdir artifacts/
+          cp -R ./templates ./artifacts/
       - restore_cache:
           key: debug-cache
-      - run: cp -R ./target/debug/blog ./artefacts/
-      - store_artefacts:
-          path: ./artefacts/
-          destination: debug-artefact
+      - run: cp -R ./target/debug/blog ./artifacts/
+      - store_artifacts:
+          path: ./artifacts/
+          destination: debug-artifact
 
 workflows:
   version: 2
@@ -57,7 +57,7 @@ workflows:
     jobs:
       - build debug
       - build release
-      - store debug artefacts:
+      - store debug artifacts:
           requires:
             - build debug
         
