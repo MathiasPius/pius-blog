@@ -51,9 +51,7 @@ fn main() -> std::io::Result<()> {
             .expect("failed to build tera inheritance chains");
         tera.check_macro_files()
             .expect("failed to check tera macro files");
-            
 
-        println!("{:?}", tera);
         let world = World::new(&tera, include_str!("../articles.json"));
 
         App::new()

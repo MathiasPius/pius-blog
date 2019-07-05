@@ -37,7 +37,6 @@ impl<'a> World<'a> {
         let articles = metadata
             .iter()
             .map(|article| {
-                println!("{:?}", tera);
 
                 let body = tera
                     .render(&format!("articles/{}", &article.template), Context::new())
