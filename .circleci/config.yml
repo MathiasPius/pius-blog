@@ -14,7 +14,7 @@ jobs:
             command: |
               rm -rf ./artifacts
               mkdir ./artifacts
-              cargo build --out-dir ./artifacts/ -Z unstable-options
+              cargo build --out-dir ./artifacts
       - save_cache:
           key: debug-cache
           paths:
@@ -35,7 +35,7 @@ jobs:
             command: |
               rm -rf ./artifacts
               mkdir ./artifacts
-              cargo build --release --out-dir ./artifacts/ -Z unstable-options
+              cargo build --release --out-dir ./artifacts
       - save_cache:
           key: release-cache
           paths:
