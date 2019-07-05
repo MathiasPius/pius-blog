@@ -2,7 +2,7 @@ use tera::{Value, Result, to_value};
 use std::collections::HashMap;
 use combine::error::ParseError;
 use combine::parser::{char::{char, letter, digit, string}, combinator::recognize};
-use combine::{choice, any, skip_many, attempt, many1, many, one_of, none_of, optional, Parser, Stream};
+use combine::{choice, any, skip_many, attempt, many1, one_of, none_of, optional, Parser, Stream};
 
 #[derive(Debug)]
 enum Type {
