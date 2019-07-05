@@ -4,15 +4,15 @@ extern crate failure;
 #[macro_use]
 extern crate serde;
 
-use tera::{Tera, Context};
-use actix_web::{App, HttpServer, HttpResponse, web};
+use actix_web::{web, App, HttpResponse, HttpServer};
+use tera::{Context, Tera};
 
-mod model;
 mod error;
 mod highlighter;
+mod model;
 
-use model::{World};
 use error::BlogError;
+use model::World;
 
 fn index(tera: web::Data<Tera>, articles: web::Data<World>) -> Result<HttpResponse, BlogError> {
     let mut ctx = Context::new();
@@ -23,14 +23,18 @@ fn index(tera: web::Data<Tera>, articles: web::Data<World>) -> Result<HttpRespon
     Ok(HttpResponse::Ok().body(body))
 }
 
-fn single_article(tera: web::Data<Tera>, world: web::Data<World>, name: web::Path<String>) -> Result<HttpResponse, BlogError> {
+fn single_article(
+    tera: web::Data<Tera>,
+    world: web::Data<World>,
+    name: web::Path<String>,
+) -> Result<HttpResponse, BlogError> {
     let article = world.find_by_slug(&name)?;
 
     let mut ctx = Context::new();
     ctx.insert("article", &article);
 
     let body = tera.render("single-article.tera", ctx)?;
-    
+
     Ok(HttpResponse::Ok().body(body))
 }
 
@@ -39,13 +43,12 @@ fn main() -> std::io::Result<()> {
     env_logger::init();
 
     HttpServer::new(move || {
-        let mut tera = Tera::parse("templates/**/*.tera")
-            .expect("failed to initialize tera templates");
+        let mut tera =
+            Tera::parse("templates/**/*.tera").expect("failed to initialize tera templates");
         tera.register_filter("highlight", highlighter::highlight);
         tera.register_filter("codeblock", highlighter::codeblock);
         tera.build_inheritance_chains()
             .expect("failed to initialize tera templates");
-
 
         println!("{:?}", tera);
         let world = World::new(&tera, include_str!("../articles.json"));
@@ -55,12 +58,8 @@ fn main() -> std::io::Result<()> {
             .data(tera)
             .wrap(actix_web::middleware::Compress::default())
             .wrap(actix_web::middleware::Logger::default())
-            .default_service(
-                web::resource("/").to_async(index)
-            )
-            .service(
-                web::resource("/{name}").to(single_article)
-            )
+            .default_service(web::resource("/").to_async(index))
+            .service(web::resource("/{name}").to(single_article))
     })
     .bind("0.0.0.0:8080")?
     .run()
