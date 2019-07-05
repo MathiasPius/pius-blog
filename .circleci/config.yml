@@ -11,12 +11,16 @@ jobs:
           key: debug-cache
       - run:
             name: Build
-            command: cargo build
+            command: |
+              rm -rf ./artifacts
+              mkdir ./artifacts
+              cargo build --out-dir ./artifacts/ -Z unstable-options
       - save_cache:
           key: debug-cache
           paths:
             - "~/.cargo"
             - "./target"
+            - "./artifacts"
 
   "build release":
     docker:
@@ -28,12 +32,16 @@ jobs:
           key: release-cache
       - run:
             name: Build
-            command: cargo build --release
+            command: |
+              rm -rf ./artifacts
+              mkdir ./artifacts
+              cargo build --release --out-dir ./artifacts/ -Z unstable-options
       - save_cache:
           key: release-cache
           paths:
             - "~/.cargo"
             - "./target"
+            - "./artifacts"
 
   "store debug artifacts":
     docker:
@@ -41,13 +49,10 @@ jobs:
 
     steps:
       - checkout
-      - run: |
-          mkdir artifacts/
-          cp -R ./templates ./artifacts/
       - restore_cache:
           key: debug-cache
       - run: |
-          cp -R ./target/debug/blog ./artifacts/
+          cp -R ./templates ./artifacts/
           tar c -zf debug.tar.gz ./artifacts/*
       - store_artifacts:
           path: ./debug.tar.gz
@@ -58,14 +63,11 @@ jobs:
       - image: frolvlad/alpine-rust:latest
 
     steps:
-      - checkout
-      - run: |
-          mkdir artifacts/
-          cp -R ./templates ./artifacts/
+      - checkout  
       - restore_cache:
           key: release-cache
       - run: |
-          cp -R ./target/release/blog ./artifacts/
+          cp -R ./templates ./artifacts/
           tar c -zf release.tar.gz ./artifacts/*
       - store_artifacts:
           path: ./release.tar.gz
