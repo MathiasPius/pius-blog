@@ -48,7 +48,10 @@ fn main() -> std::io::Result<()> {
         tera.register_filter("highlight", highlighter::highlight);
         tera.register_filter("codeblock", highlighter::codeblock);
         tera.build_inheritance_chains()
-            .expect("failed to initialize tera templates");
+            .expect("failed to build tera inheritance chains");
+        tera.check_macro_files()
+            .expect("failed to check tera macro files");
+            
 
         println!("{:?}", tera);
         let world = World::new(&tera, include_str!("../articles.json"));
