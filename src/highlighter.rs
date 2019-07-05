@@ -117,7 +117,7 @@ fn root<'a, I>() -> impl Parser<Input = I, Output = Vec<Token>>
 	)
 }
 
-pub fn highlight(value: Value, _map: HashMap<String, Value>) -> Result<Value> {
+pub fn highlight(value: &Value, _map: &HashMap<String, Value>) -> Result<Value> {
 	match value.as_str() {
 		Some(value) => {
 			let tokens = root().parse(value);
@@ -140,7 +140,7 @@ pub fn highlight(value: Value, _map: HashMap<String, Value>) -> Result<Value> {
 	}
 }
 
-pub fn codeblock(value: Value, _map: HashMap<String, Value>) -> Result<Value> {
+pub fn codeblock(value: &Value, _map: &HashMap<String, Value>) -> Result<Value> {
 	match value.as_str() {
 		Some(value) => {
 			let mut concat = String::new();

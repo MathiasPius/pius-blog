@@ -18,7 +18,7 @@ fn index(tera: web::Data<Tera>, articles: web::Data<World>) -> Result<HttpRespon
     let mut ctx = Context::new();
     ctx.insert("articles", &articles.articles);
 
-    let body = tera.render("frontpage.tera", &ctx)?;
+    let body = tera.render("frontpage.tera", ctx)?;
 
     Ok(HttpResponse::Ok().body(body))
 }
@@ -29,7 +29,7 @@ fn single_article(tera: web::Data<Tera>, world: web::Data<World>, name: web::Pat
     let mut ctx = Context::new();
     ctx.insert("article", &article);
 
-    let body = tera.render("single-article.tera", &ctx)?;
+    let body = tera.render("single-article.tera", ctx)?;
     
     Ok(HttpResponse::Ok().body(body))
 }
@@ -46,6 +46,8 @@ fn main() -> std::io::Result<()> {
         tera.build_inheritance_chains()
             .expect("failed to initialize tera templates");
 
+
+        println!("{:?}", tera);
         let world = World::new(&tera, include_str!("../articles.json"));
 
         App::new()
