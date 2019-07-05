@@ -12,16 +12,19 @@ jobs:
       - run:
             name: Build
             command: |
-              rm -rf ./artifacts
               mkdir ./artifacts
               cargo build
               cp ./target/debug/blog ./artifacts/
+              cp -R ./templates ./artifacts/templates
+              tar c -zf debug.tar.gz ./artifacts/*
+      - store_artifacts:
+          path: ./debug.tar.gz
+          destination: debug-artifact.tar.gz
       - save_cache:
           key: debug-cache
           paths:
             - "~/.cargo"
             - "./target"
-            - "./artifacts"
 
   "build release":
     docker:
@@ -34,46 +37,19 @@ jobs:
       - run:
             name: Build
             command: |
-              rm -rf ./artifacts
               mkdir ./artifacts
               cargo build --release
               cp ./target/release/blog ./artifacts/
+              cp -R ./templates ./artifacts/templates
+              tar c -zf release.tar.gz ./artifacts/*
+      - store_artifacts:
+          path: ./release.tar.gz
+          destination: release-artifact.tar.gz
       - save_cache:
           key: release-cache
           paths:
             - "~/.cargo"
             - "./target"
-            - "./artifacts"
-
-  "store debug artifacts":
-    docker:
-      - image: frolvlad/alpine-rust:latest
-
-    steps:
-      - checkout
-      - restore_cache:
-          key: debug-cache
-      - run: |
-          cp -R ./templates ./artifacts/
-          tar c -zf debug.tar.gz ./artifacts/*
-      - store_artifacts:
-          path: ./debug.tar.gz
-          destination: debug-artifact.tar.gz
-
-  "store release artifacts":
-    docker:
-      - image: frolvlad/alpine-rust:latest
-
-    steps:
-      - checkout  
-      - restore_cache:
-          key: release-cache
-      - run: |
-          cp -R ./templates ./artifacts/
-          tar c -zf release.tar.gz ./artifacts/*
-      - store_artifacts:
-          path: ./release.tar.gz
-          destination: release-artifact.tar.gz
 
 workflows:
   version: 2
@@ -81,11 +57,3 @@ workflows:
     jobs:
       - build debug
       - build release
-      - store debug artifacts:
-          requires:
-            - build debug
-
-      - store release artifacts:
-          requires:
-            - build release
-        
