@@ -14,7 +14,8 @@ jobs:
             command: |
               rm -rf ./artifacts
               mkdir ./artifacts
-              cargo build --out-dir ./artifacts
+              cargo Build
+              cp ./target/debug/blog ./artifacts/
       - save_cache:
           key: debug-cache
           paths:
@@ -35,7 +36,8 @@ jobs:
             command: |
               rm -rf ./artifacts
               mkdir ./artifacts
-              cargo build --release --out-dir ./artifacts
+              cargo build --release
+              cp ./target/release/blog ./artifacts/
       - save_cache:
           key: release-cache
           paths:
