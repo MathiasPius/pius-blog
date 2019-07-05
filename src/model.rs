@@ -36,6 +36,8 @@ impl<'a> World<'a> {
 
 		let articles = metadata.iter()
 			.map(|article| {
+				println!("Highlight, Codeblock: {:?}, {:?}", tera.get_filter("highlight"), tera.get_filter("codeblock"));
+
 				let body = tera.render(&format!("articles/{}", &article.template), &Context::new())
 					.expect(&format!("unable to load article template {}", &article.template));
 
