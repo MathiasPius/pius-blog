@@ -20,7 +20,7 @@ fn index(tera: web::Data<Tera>, articles: web::Data<World>) -> Result<HttpRespon
 
     let body = tera.render("frontpage.tera", ctx)?;
 
-    Ok(HttpResponse::Ok().body(body))
+    Ok(HttpResponse::Ok().content_type("text/html").body(body))
 }
 
 fn single_article(
@@ -35,7 +35,7 @@ fn single_article(
 
     let body = tera.render("single-article.tera", ctx)?;
 
-    Ok(HttpResponse::Ok().body(body))
+    Ok(HttpResponse::Ok().content_type("text/html").body(body))
 }
 
 fn main() -> std::io::Result<()> {
