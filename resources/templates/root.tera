@@ -18,6 +18,8 @@
 				{% block breadcrumb %}
 				<a href="/">Home</a>
 				{% endblock breadcrumb %}
+				<a href="https://github.com/MathiasPius" class="external"><img src="/static/github.png" /></a>
+				<a href="https://www.linkedin.com/in/mathias-pius/" class="external"><img src="/static/linkedin.png" /></a>
 			</nav>
 		</div>
 	</header>

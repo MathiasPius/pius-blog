@@ -53,6 +53,9 @@ fn main() -> std::io::Result<()> {
                 web::resource("/").to(index)
             )
             .service(
+                actix_files::Files::new("/static", "resources/static")
+            )
+            .service(
                 web::resource("/articles/{slug}").to(single_article)
             )
     })
