@@ -1,0 +1,24 @@
+ 
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<html>
+<head>
+</script>
+  <script language="javascript" type="text/javascript">
+      function connect() {
+        var wsUri = 'ws://localhost:8080/statistics';
+        conn = new WebSocket(wsUri);
+
+        conn.onmessage = function(e) {
+            var log = document.getElementById("log");
+            log.innerHTML = log.innerHTML + e.data + "<br />";
+        };
+      }
+</script>
+</head>
+<body onload="connect()">
+<div id="log"
+     style="width:20em;height:15em;overflow:auto;border:1px solid black">
+</div>
+</body>
+</html>

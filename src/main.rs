@@ -8,11 +8,14 @@ extern crate lazy_static;
 mod error;
 mod model;
 mod highlighter;
+mod stats;
 
+use actix::Actor;
 use actix_web::{web::{self, Data, Path}, App, HttpServer, HttpResponse};
 use tera::{Tera, Context};
 use model::World;
 use error::BlogError;
+use stats::{StatisticsServer, system_stats};
 
 fn index(world: Data<World>, tera: Data<Tera>) -> Result<HttpResponse, BlogError> {
     let mut ctx = tera::Context::new();
@@ -36,6 +39,10 @@ fn single_article(world: Data<World>, tera: Data<Tera>, slug: Path<String>)
 }
 
 fn main() -> std::io::Result<()> {
+    let _sys = actix::System::new("system");
+
+    let stats_server = StatisticsServer::default().start();
+
     HttpServer::new(move || {
         let mut tera = Tera::new("resources/templates/**/*")
             .expect("failed to initialize templates");
@@ -46,6 +53,7 @@ fn main() -> std::io::Result<()> {
         let world = World::new(&tera, include_str!("../resources/articles.json"));
 
         App::new()
+            .data(stats_server.clone())
             .data(world)
             .data(tera)
             .wrap(actix_web::middleware::Logger::default())
@@ -54,6 +62,9 @@ fn main() -> std::io::Result<()> {
             )
             .service(
                 actix_files::Files::new("/static", "resources/static")
+            )
+            .service(
+                web::resource("/statistics").to(system_stats)
             )
             .service(
                 web::resource("/articles/{slug}").to(single_article)
