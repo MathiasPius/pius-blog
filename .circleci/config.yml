@@ -3,7 +3,7 @@ version: 2
 jobs:
   "build debug":
     docker:
-      - image: justincormack/alpine-rust:latest
+      - image: rust:1.38.0-alpine3.10
 
     steps:
       - checkout
@@ -28,7 +28,7 @@ jobs:
 
   "build release":
     docker:
-      - image: justincormack/alpine-rust:latest
+      - image: rust:1.38.0-alpine3.10
 
     steps:
       - checkout
