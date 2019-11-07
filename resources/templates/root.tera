@@ -42,7 +42,7 @@
 		}
 
       	function connect() {
-        	var wsUri = 'ws://{{ hostname }}/statistics';
+        	var wsUri = '{{ websocket }}/statistics';
         	conn = new WebSocket(wsUri);
 
         	var mem = document.getElementById("memory");

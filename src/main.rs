@@ -19,7 +19,7 @@ use stats::{StatisticsServer, system_stats, GetInitialValues};
 
 fn create_context(stats: Data<Addr<StatisticsServer>>) -> Context {
     let mut ctx = tera::Context::new();
-    ctx.insert("hostname", &std::env::var("BLOG_HOSTNAME").unwrap_or("localhost:8080".into()));
+    ctx.insert("websocket", &std::env::var("BLOG_WEBSOCKET").unwrap_or("ws://localhost:8080".into()));
     if let Ok(stats) = stats.send(GetInitialValues {}).wait() {
         if let Ok(values) = stats {
             ctx.insert("stats", &values);
