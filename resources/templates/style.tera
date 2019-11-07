@@ -61,6 +61,33 @@ article small {
 	color: rgba(0,0,0,0.5)
 }
 
+div.codeblock > pre {
+	white-space: pre-wrap;
+	padding: 5px;
+}
+
+div.codeblock > pre:before {
+    counter-reset: listing;
+}
+div.codeblock > pre code {
+	position: relative;
+	padding-left: 5ch;
+    counter-increment: listing;
+	display: inline-block;
+	width: calc(100% - 5ch);
+}
+
+div.codeblock > pre code::before {
+	position:absolute;
+	content: counter(listing) "  ";
+	display: inline-block;
+	width: 5ch;
+	padding-left: auto;
+	margin-left: -5ch;
+	text-align: right;
+	height: 100%;
+}
+
 @media screen and (min-width: 1000px) {
 	.boxed {
 		width: 1000px;

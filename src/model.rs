@@ -39,7 +39,7 @@ impl<'a> World<'a> {
             .map(|article| {
 
                 let body = tera
-                    .render(&format!("articles/{}", &article.template), Context::new())
+                    .render(&format!("articles/{}", &article.template), &Context::new())
                     .expect(&format!(
                         "unable to load article template {}",
                         &article.template
@@ -52,7 +52,7 @@ impl<'a> World<'a> {
                     None => {
                         let mut ctx = Context::new();
                         ctx.insert(&"title", &article.title);
-                        Tera::one_off("{{ title | slugify }}", ctx, false).expect(&format!(
+                        Tera::one_off("{{ title | slugify }}", &ctx, false).expect(&format!(
                             "unable to generate slug for article {}",
                             &article.title
                         ))

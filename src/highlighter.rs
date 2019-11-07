@@ -1,188 +1,112 @@
-use combine::error::ParseError;
-use combine::parser::{
-    char::{char, digit, letter, string},
-    combinator::recognize,
-};
-use combine::{any, attempt, choice, many1, none_of, one_of, optional, skip_many, Parser, Stream};
+use std::cmp::max;
+use std::path::Path;
+use std::io::BufRead;
 use std::collections::HashMap;
-use tera::{to_value, Result, Value};
+use tera::{Result, Value};
+use syntect::{
+    parsing::SyntaxSet,
+    html::{
+        IncludeBackground,
+        start_highlighted_html_snippet,
+        append_highlighted_html_for_styled_line
+    },
+    highlighting::{Color, Theme, ThemeSet},
+    easy::HighlightFile
+};
 
-#[derive(Debug)]
-enum Type {
-    Keyword,
-    Name,
-    Number,
-    Whitespace,
-    String,
-    None,
+lazy_static! {
+    static ref SYNTAXSET: SyntaxSet = SyntaxSet::load_defaults_newlines();
+    static ref THEMESET: ThemeSet = ThemeSet::load_defaults();
 }
 
-#[derive(Debug)]
-struct Token {
-    value: String,
-    ttype: Type,
+const DEFAULT_THEME: &str = "base16-ocean.dark";
+
+fn accentuate(color: Color, degree: u8) -> String {
+    format!("rgba({}, {}, {}, {})",
+        max(color.r, degree) - degree,
+        max(color.g, degree) - degree,
+        max(color.b, degree) - degree,
+        color.a
+    )
 }
 
-impl Token {
-    fn new<S: ToString>(ttype: Type, value: S) -> Token {
-        Token {
-            ttype,
-            value: value.to_string(),
-        }
-    }
-}
+// This function is lifted more or less one-to-one from syntect, but adds the <code></code>
+// which allows us to do nice line numbering on em
+fn syntax_highlighter<P: AsRef<Path>>(path: P, theme: &Theme) -> std::io::Result<String> {
+    let mut highlighter = HighlightFile::new(path, &SYNTAXSET, theme)?;
+    let (mut output, bg) = start_highlighted_html_snippet(theme);
 
-impl std::fmt::Display for Token {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self.ttype {
-            Type::Keyword => write!(
-                f,
-                "<code class=\"hl-keyword\">{}</code>",
-                tera::escape_html(&self.value)
-            ),
-            Type::Name => write!(
-                f,
-                "<code class=\"hl-name\">{}</code>",
-                tera::escape_html(&self.value)
-            ),
-            Type::Number => write!(
-                f,
-                "<code class=\"hl-number\">{}</code>",
-                tera::escape_html(&self.value)
-            ),
-            Type::String => write!(
-                f,
-                "<code class=\"hl-quote\">{}</code>",
-                tera::escape_html(&self.value)
-            ),
-            _ => write!(f, "{}", tera::escape_html(&self.value)),
-        }
-    }
-}
+    let numbering = theme.settings.gutter_foreground
+        .or(theme.settings.foreground)
+        .unwrap_or(Color::BLACK);
 
-fn keyword<'a, I>() -> impl Parser<Input = I, Output = Token>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    choice((
-        attempt(string("if")),
-        attempt(string("else")),
-        attempt(string("fn")),
-        attempt(string("impl")),
-        attempt(string("where")),
-        attempt(string("match")),
-        attempt(string("let")),
-        attempt(string("mut")),
-    ))
-    .map(|v| Token {
-        ttype: Type::Keyword,
-        value: v.to_string(),
-    })
-}
+    output.push_str(&format!("<style type=\"text/css\">pre code::before {{ color: rgba({}, {}, {}, {}); }}</style>",
+        numbering.r, numbering.g, numbering.b, numbering.a
+    ));
 
-fn quoted_string<'a, I>() -> impl Parser<Input = I, Output = Token>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    recognize((char('\"'), skip_many(none_of("\"".chars())), char('\"')))
-        .map(|v: String| Token::new(Type::String, v))
-}
+    // This is an alternate background color used for every second line to distinguish them
+    let extras = theme.settings.background.map(|c|
+        format!("style=\"background-color: {};\"", accentuate(c, 5))
+    ).unwrap_or("".into());
 
-fn word<'a, I>() -> impl Parser<Input = I, Output = Token>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    recognize((letter(), skip_many(choice((letter(), digit(), char('_'))))))
-        .map(|v: String| Token::new(Type::Name, v))
-}
-
-fn number<'a, I>() -> impl Parser<Input = I, Output = Token>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    recognize((
-        digit(),
-        skip_many(choice((digit(), char('.')))),
-        optional(char('f')),
-    ))
-    .map(|v: String| Token::new(Type::Number, v))
-}
-
-fn whitespace<'a, I>() -> impl Parser<Input = I, Output = Token>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    one_of("\t\r\n ".chars()).map(|v| Token::new(Type::Whitespace, v))
-}
-
-fn catch_all<'a, I>() -> impl Parser<Input = I, Output = Token>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    any().map(|v: char| Token::new(Type::None, v.to_string()))
-}
-
-fn root<'a, I>() -> impl Parser<Input = I, Output = Vec<Token>>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    many1(choice((
-        attempt(keyword()),
-        attempt(quoted_string()),
-        attempt(number()),
-        attempt(word()),
-        attempt(whitespace()),
-        catch_all(),
-    )))
-}
-
-pub fn highlight(value: &Value, _map: &HashMap<String, Value>) -> Result<Value> {
-    match value.as_str() {
-        Some(value) => {
-            let tokens = root().parse(value);
-            match tokens {
-                Ok((tokens, _)) => {
-                    let mut concat = String::new();
-
-                    concat.push_str("<code>");
-                    for token in &tokens {
-                        concat.push_str(&format!("{}", token));
-                    }
-                    concat.push_str("</code>");
-
-                    Ok(to_value(concat).unwrap())
-                }
-                Err(_) => Ok(to_value("failed to parse code for syntax highlighting").unwrap()),
+    let mut line = String::new();
+    let mut alternate = false;
+    while highlighter.reader.read_line(&mut line)? > 0 {
+        {
+            if alternate {
+                output.push_str(&format!("<code {}>", extras));
+            } else {
+                output.push_str("<code>");
             }
+            alternate = !alternate;
+
+            let regions = highlighter.highlight_lines.highlight(&line, &SYNTAXSET);
+            append_highlighted_html_for_styled_line(&regions[..], IncludeBackground::IfDifferent(bg), &mut output);
+            output.push_str("</code>");
         }
-        _ => Ok(to_value("value is not a string apparently").unwrap()),
+        line.clear();
     }
+    output.push_str("</pre>\n");
+    Ok(output)
 }
 
-pub fn codeblock(value: &Value, _map: &HashMap<String, Value>) -> Result<Value> {
-    match value.as_str() {
-        Some(value) => {
-            let mut concat = String::new();
 
-            concat.push_str("<pre>");
-            for character in value.chars() {
-                match character {
-                    '\t' => concat.push_str("&nbsp;&nbsp;&nbsp;&nbsp;"),
-                    '\n' => concat.push_str("<br />"),
-                    _ => concat.push(character),
-                };
-            }
-            concat.push_str("</pre>");
+pub fn highlight(args: HashMap<String, Value>) -> Result<Value>{
+    // Extracting the chosen theme is split into two blocks like this
+    // to prevent heap-allocating the default theme string each time
+    let chosen_theme = match args.get("theme") {
+        Some(value) => tera::from_value::<String>(value.clone())
+            .map(|x| Some(x))
+            .unwrap_or(None),
+        _ => None
+    };
 
-            Ok(to_value(concat).unwrap())
+    let theme = match &chosen_theme {
+        Some(theme) => &THEMESET.themes[theme],
+        None => &THEMESET.themes[DEFAULT_THEME]
+    };
+
+
+    if let Some(value) = args.get("file") {
+        if let Ok(filename) = tera::from_value::<String>(value.clone()) { 
+            let html = syntax_highlighter(&filename, &theme)
+                .map_err(|e| tera::Error::from(
+                    format!("failed to generate syntax highlighting for {}: {}", &filename, e)
+                ))?;
+
+            return Ok(tera::to_value(html)?);
         }
-        _ => Ok(to_value("value is not a string apparently").unwrap()),
     }
+
+    Err(tera::Error::from(format!("missing file or text parameter")))
+}
+
+pub fn codeblock(value: Value, _: HashMap<String, Value>) -> Result<Value> {
+    if let Ok(source) = tera::from_value::<String>(value) {
+        return Ok(tera::to_value(&format!("<div class=\"codeblock\">{}</div>", source))
+            .map_err(|e| tera::Error::from(format!("failed to serialize codeblock: {}", e)))?
+        );
+    }
+
+    Err(tera::Error::from(format!("missing input to codeblock function")))
 }

@@ -13,5 +13,5 @@
 {% endmacro subtext %}
 
 {% macro title(article) %}
-	<a href="/{{ article.slug }}"><h1 class="lead">{{ article.title }}</h1></a>
+	<a href="/articles/{{ article.slug }}"><h1 class="lead">{{ article.title }}</h1></a>
 {% endmacro title %}

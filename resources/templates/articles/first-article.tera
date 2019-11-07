@@ -3,25 +3,7 @@ This is the body of the article!
 <h2>Lorem Ipsum?</h2>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In nec sem nec tellus facilisis porta. Fusce a nunc pharetra, mollis sem quis, elementum ligula. Nam at elementum enim. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras quis facilisis nisi. Aenean maximus nisi et velit maximus, eu sodales ex molestie. Donec aliquet, dolor quis viverra interdum, risus leo suscipit nulla, sit amet blandit massa augue ut tortor.</p>
 
-<p>
-{{ `
-fn number<'a, I>() -> impl Parser<Input = I, Output = Token>
-    where I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>
-{
-	recognize((digit(), skip_many(choice((digit(), char('.')))), optional(char('f'))))
-		.map(|v| Token { ttype: Type::Number, value: v})
-}
-
-
-fn whitespace<'a, I>() -> impl Parser<Input = I, Output = Token>
-    where I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>
-{
-	one_of("\t\r\n ".chars()).map(|v: char| Token { ttype: Type::Whitespace, value: v.to_string()})
-}
-` | highlight | codeblock }}
-</p>
+{{ highlight(file="resources/templates/articles/src.rs") | codeblock }}
 
 <p>Cras non neque egestas, lacinia urna eget, aliquam ante. Suspendisse nulla est, aliquet et nulla in, blandit vehicula eros. Quisque iaculis rhoncus purus, at pulvinar sem elementum efficitur. Aliquam luctus, turpis id consequat vestibulum, lorem metus viverra arcu, sed convallis orci mauris consequat magna. Donec quis convallis urna, nec efficitur tortor. Cras tristique sapien at dolor facilisis, sit amet luctus felis euismod. Pellentesque vehicula ut ex ut elementum. Suspendisse tristique tincidunt ante id pellentesque. Quisque et mi eleifend, pulvinar velit vitae, egestas turpis. Integer arcu dolor, sagittis sit amet lacus ac, porta pulvinar nibh. Morbi posuere mi a purus ultricies, sed egestas eros laoreet. Vivamus mattis cursus urna. Mauris sollicitudin sodales purus, ac iaculis quam. Sed gravida risus quis tellus volutpat lobortis. Sed sit amet ex ac purus porttitor dapibus.</p>
 
