@@ -3,7 +3,7 @@ version: 2
 jobs:
   "build debug":
     docker:
-      - image: frolvlad/alpine-rust:latest
+      - image: justincormack/alpine-rust:latest
 
     steps:
       - checkout
@@ -28,7 +28,7 @@ jobs:
 
   "build release":
     docker:
-      - image: frolvlad/alpine-rust:latest
+      - image: justincormack/alpine-rust:latest
 
     steps:
       - checkout
