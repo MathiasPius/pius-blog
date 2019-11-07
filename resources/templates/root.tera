@@ -3,6 +3,10 @@
 <html>
 <head lang="en">
 	{% block meta %}
+		<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+		<link rel="manifest" href="/static/images/site.webmanifest">
 		<meta charset="utf-8">
 	{% endblock meta %}
 	{% block style %}
@@ -68,8 +72,8 @@
 				<a href="/">Home</a>
 				{% endblock breadcrumb %}
 
-				<a href="https://github.com/MathiasPius" class="external"><img src="/static/github.png" /></a>
-				<a href="https://www.linkedin.com/in/mathias-pius/" class="external"><img src="/static/linkedin.png" /></a>
+				<a href="https://github.com/MathiasPius" class="external"><img src="/static/images/github.png" /></a>
+				<a href="https://www.linkedin.com/in/mathias-pius/" class="external"><img src="/static/images/linkedin.png" /></a>
 
 				<svg width="100" height="32" id="load_average">
 					<title>load average</title>
