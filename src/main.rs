@@ -10,27 +10,38 @@ mod model;
 mod highlighter;
 mod stats;
 
-use actix::Actor;
+use actix::{prelude::*, Actor};
 use actix_web::{web::{self, Data, Path}, App, HttpServer, HttpResponse};
 use tera::{Tera, Context};
 use model::World;
 use error::BlogError;
-use stats::{StatisticsServer, system_stats};
+use stats::{StatisticsServer, system_stats, GetInitialValues};
 
-fn index(world: Data<World>, tera: Data<Tera>) -> Result<HttpResponse, BlogError> {
+
+fn create_context(stats: Data<Addr<StatisticsServer>>) -> Context {
     let mut ctx = tera::Context::new();
+    if let Ok(stats) = stats.send(GetInitialValues {}).wait() {
+        if let Ok(values) = stats {
+            ctx.insert("stats", &values);
+        }
+    }
+
+    ctx
+}
+
+fn index(world: Data<World>, tera: Data<Tera>, stats: Data<Addr<StatisticsServer>>) -> Result<HttpResponse, BlogError> {
+    let mut ctx = create_context(stats);
     ctx.insert("articles", &world.articles);
     let body = tera.render("frontpage.tera", &ctx)?;
 
     Ok(HttpResponse::Ok().content_type("text/html").body(body))
 }
 
-fn single_article(world: Data<World>, tera: Data<Tera>, slug: Path<String>) 
+fn single_article(world: Data<World>, tera: Data<Tera>, stats: Data<Addr<StatisticsServer>>, slug: Path<String>) 
     -> Result<HttpResponse, BlogError> 
 {
     let article = world.find_by_slug(&slug)?;
-
-    let mut ctx = Context::new();
+    let mut ctx = create_context(stats);
     ctx.insert("article", &article);
 
     let body = tera.render("single-article.tera", &ctx)?;

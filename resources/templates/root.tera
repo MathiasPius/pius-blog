@@ -24,6 +24,21 @@
 		</div>
 	</header>
 	<main class="boxed">
+		<svg width="100" height="32" id="memory_usage">
+		{% for measurement in stats.memory_used %}
+			<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="{{ 32 - (measurement / stats.max_memory) * 32 }}" />
+		{% endfor %}
+		</svg>
+		<svg width="100" height="32" id="load_average">
+		{% for measurement in stats.load_average %}
+			{% if measurement >= 1 %}
+			<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="32" style="stroke: rgba(255,100,100,.2);"/>
+			{% else %}
+			<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="{{ 32 - measurement * 32 }}" />
+			{% endif %}
+		{% endfor %}
+		</svg>
+
 		{% block content %}
 
 		{% endblock content %}
