@@ -35,6 +35,21 @@ nav > a.external {
 	float: right;
 }
 
+nav > svg {
+	float: right;
+	margin-left: 20px;
+}
+
+nav > svg > line {
+	stroke: rgba(100,100,100,.2);
+	stroke-width: 1;
+}
+
+nav > svg > rect {
+	fill: rgba(0,0,0,0.001);
+	stroke-width: 0;
+}
+
 a {
 	text-decoration: none;
 	color: rgb(1, 116, 212)
@@ -95,11 +110,6 @@ div.codeblock > pre code::before {
 	margin-left: -5ch;
 	text-align: right;
 	height: 100%;
-}
-
-svg > line {
-	stroke: rgba(100,100,100,.2);
-	stroke-width: 1;
 }
 
 @media screen and (min-width: 1000px) {

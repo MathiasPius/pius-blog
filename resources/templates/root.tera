@@ -10,35 +10,87 @@
 		{% include "highlighter.tera" %}
 	{% endblock style %}
 	<title>{% block title %}Title Goes Here{% endblock title %}</title>
+	<script language="javascript" type="text/javascript">
+		var historical_data = {
+			max_memory: {{ stats.max_memory }},
+			memory_used: {{ stats.memory_used }},
+			load_average: {{ stats.load_average}}
+		}
+
+		function redraw() {
+			var html = "";
+			for (i in historical_data.memory_used) {
+				html += "<line x1=\"" + (100 - i) + "\" y1=\"32\" x2=\"" + (100 - i) + "\" y2=\"" + (32 - (historical_data.memory_used[i] / historical_data.max_memory) * 32) + "\" />"
+			}
+			html += "<title>memory usage " + Math.floor(historical_data.memory_used[historical_data.memory_used.length - 1] / (1024*1024)) + " &#47; " + Math.floor(historical_data.max_memory / (1024*1024)) + " MB</title>";
+			document.getElementById("memory_usage").innerHTML = html;
+
+			html = "";
+			for (i in historical_data.load_average) {
+				if (historical_data.load_average[i] >= 1) {
+					html += "<line x1=\"" + (100 - i) + "\" y1=\"32\" x2=\"" + (100 - i) + "\" y2=\"0\" style=\"stroke: rgba(255,100,100,.2);\"/>"
+				} else {
+					html += "<line x1=\"" + (100 - i) + "\" y1=\"32\" x2=\"" + (100 - i) + "\" y2=\"" + (32 - historical_data.load_average[i] * 32) + "\" />"
+				}
+			}
+			html += "<title>load average " + Math.round(historical_data.load_average[historical_data.load_average.length - 1] * 100) / 100 + "</title>";
+			document.getElementById("load_average").innerHTML = html;
+		}
+
+      	function connect() {
+        	var wsUri = 'ws://localhost:8080/statistics';
+        	conn = new WebSocket(wsUri);
+
+        	var mem = document.getElementById("memory");
+
+        	conn.onmessage = function(e) {
+				var msg = JSON.parse(e.data);
+				historical_data.load_average.unshift(msg.Update.load_average);
+				historical_data.memory_used.unshift(msg.Update.memory_used);
+
+				if (historical_data.load_average.length > 100) {
+					historical_data.load_average.pop();
+				}
+
+				if (historical_data.memory_used.length > 100) {
+					historical_data.memory_used.pop();
+				}
+				redraw();
+        	};
+		}
+	</script>
 </head>
-<body>
+<body onload="connect()">
 	<header>
 		<div class="boxed">
 			<nav>
 				{% block breadcrumb %}
 				<a href="/">Home</a>
 				{% endblock breadcrumb %}
+
 				<a href="https://github.com/MathiasPius" class="external"><img src="/static/github.png" /></a>
 				<a href="https://www.linkedin.com/in/mathias-pius/" class="external"><img src="/static/linkedin.png" /></a>
+
+				<svg width="100" height="32" id="load_average">
+					<title>load average</title>
+				{% for measurement in stats.load_average %}
+					{% if measurement >= 1 %}
+					<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="0" style="stroke: rgba(255,100,100,.2);"/>
+					{% else %}
+					<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="{{ 32 - measurement * 32 }}" />
+					{% endif %}
+				{% endfor %}
+				</svg>
+				<svg width="100" height="32" id="memory_usage">
+					<title>memory usage</title>
+				{% for measurement in stats.memory_used %}
+					<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="{{ 32 - (measurement / stats.max_memory) * 32 }}" />
+				{% endfor %}
+				</svg>
 			</nav>
 		</div>
 	</header>
 	<main class="boxed">
-		<svg width="100" height="32" id="memory_usage">
-		{% for measurement in stats.memory_used %}
-			<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="{{ 32 - (measurement / stats.max_memory) * 32 }}" />
-		{% endfor %}
-		</svg>
-		<svg width="100" height="32" id="load_average">
-		{% for measurement in stats.load_average %}
-			{% if measurement >= 1 %}
-			<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="32" style="stroke: rgba(255,100,100,.2);"/>
-			{% else %}
-			<line x1="{{ 100 - loop.index }}" y1="32" x2="{{ 100 - loop.index }}" y2="{{ 32 - measurement * 32 }}" />
-			{% endif %}
-		{% endfor %}
-		</svg>
-
 		{% block content %}
 
 		{% endblock content %}
