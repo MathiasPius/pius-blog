@@ -42,7 +42,7 @@
 		}
 
       	function connect() {
-        	var wsUri = 'ws://blog.pius.io/statistics';
+        	var wsUri = 'ws://{{ hostname }}/statistics';
         	conn = new WebSocket(wsUri);
 
         	var mem = document.getElementById("memory");

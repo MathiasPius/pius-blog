@@ -17,9 +17,9 @@ use model::World;
 use error::BlogError;
 use stats::{StatisticsServer, system_stats, GetInitialValues};
 
-
 fn create_context(stats: Data<Addr<StatisticsServer>>) -> Context {
     let mut ctx = tera::Context::new();
+    ctx.insert("hostname", &std::env::var("BLOG_HOSTNAME").unwrap_or("localhost:8080".into()));
     if let Ok(stats) = stats.send(GetInitialValues {}).wait() {
         if let Ok(values) = stats {
             ctx.insert("stats", &values);
