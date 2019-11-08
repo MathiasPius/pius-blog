@@ -119,7 +119,7 @@ where
         let policy = format!("default-src: {default}; script-src: {script}; style-src: {style}, connect-src: {connect}",
             default = "'self'",
             script = format!("nonce-{}", &nonce.0),
-            style = format!("nonce-{}", &nonce.0),
+            style = format!("'unsafe-inline' nonce-{}", &nonce.0),
             connect = "'self' ws: wss:;"
         );
 
