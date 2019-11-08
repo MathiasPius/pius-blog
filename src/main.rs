@@ -73,6 +73,7 @@ fn main() -> std::io::Result<()> {
             .data(world)
             .data(tera)
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(actix_web::middleware::Compress::default())
             .wrap(CSPNonce::default())
             .default_service(
                 web::resource("/").to(index)
