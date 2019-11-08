@@ -14,7 +14,7 @@
 		{% include "highlighter.tera" %}
 	{% endblock style %}
 	<title>{% block title %}Title Goes Here{% endblock title %}</title>
-	<script language="javascript" type="text/javascript">
+	<script language="javascript" nonce="{{ csp_nonce }}" type="text/javascript">
 		var historical_data = {
 			max_memory: {{ stats.max_memory }},
 			memory_used: {{ stats.memory_used }},
